@@ -1,5 +1,5 @@
 // Albert OBMEPeiro — service worker (funciona offline depois da 1ª visita)
-const V = 'albert-v28';
+const V = 'albert-v31';
 const PKV = '22';
 const SHELL = ['./', './index.html', './questoes.js', './aprender.js', './gemeas.js', './aulas.js', './firebase-config.js', './manifest.webmanifest', './icons/owl.svg', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
