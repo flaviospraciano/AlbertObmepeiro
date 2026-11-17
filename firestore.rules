@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // É Admin Maestro quem tem um documento em /admins/{seu UID}
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Cada aluno (Albertzão) é um documento em /jogadores/{UID}
+    match /jogadores/{uid} {
+      // o próprio aluno lê e grava só o seu progresso
+      allow read, create, update: if request.auth != null && request.auth.uid == uid;
+      // o professor lê todos e pode apagar
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Questão do dia: cada jogador grava uma única resposta por dia; todos os logados veem o ranking.
+    match /diaria/{dia}/respostas/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update, delete: if false;
+    }
+
+    // Lista de professores. Um usuário vira admin pelo próprio app
+    // (Perfil → Modo professor) informando o código Maestro.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.codigo == '728497';
+      allow update: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.codigo == '728497';
+      allow delete: if false;
+    }
+  }
+}
